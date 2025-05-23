@@ -7,6 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import { FaRegCopy } from "react-icons/fa";
 import Cookies from 'js-cookie';
 import { nanoid } from 'nanoid';
+import Server_Url from './Constant';
 
 const UrlShortner = () => {
     const [modal, setModal] = useState(false);
@@ -27,7 +28,7 @@ const UrlShortner = () => {
     const handleUrl = async () => {
         try{
             if(!originalUrl) return alert('please enter link first');
-            const res = await axios.post('http://localhost:3000/api/short', { originalUrl, user });
+            const res = await axios.post(`${Server_Url}/api/short`, { originalUrl, user });
             // console.log(res.data.message);
             if(res.data.message == "Already shorten") toast.error("Already shorten")
             setOriginalUrl(' ');
@@ -42,7 +43,7 @@ const UrlShortner = () => {
 
     const findAllUrl = async () => {
         try{
-            const res = await axios.get(`http://localhost:3000/api/all/${user}`);
+            const res = await axios.get(`${Server_Url}/api/all/${user}`);
             // console.log(res.data);
             setAllUrl(res.data.url);
         }catch(err){    
@@ -65,7 +66,7 @@ const UrlShortner = () => {
 
     // copy url 
     const handleCopy = async (url) => {
-    const newURL = `http://localhost:3000/api/${url}`;
+    const newURL = `${Server_Url}/api/${url}`;
        try{
         await navigator.clipboard.writeText(newURL);
         toast.success('copied');
@@ -78,7 +79,7 @@ const UrlShortner = () => {
     const deleteUrl = async (originalUrl) => {
         if(!originalUrl) return
         try{
-            const res = await axios.delete(`http://localhost:3000/api/urldelete`, { data: { originalUrl } });
+            const res = await axios.delete(`${Server_Url}/api/urldelete`, { data: { originalUrl } });
             // console.log(res.data);
             setOriginalUrl(' ');
         }catch(err){
@@ -111,7 +112,7 @@ const UrlShortner = () => {
                                 className="w-full p-3 shadow-sm bg-white rounded-lg  flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between items-start md:items-center gap-4" >
                               <p className="truncate w-full lg:w-auto text-lg">{data.originalUrl}</p>
                                <div className="flex gap-4 items-center ">
-                                  <a href={`http://localhost:3000/api/${data.shortenUrl}`} target="_blank" rel="noopener noreferrer"
+                                  <a href={`${Server_Url}/api/${data.shortenUrl}`} target="_blank" rel="noopener noreferrer"
                                   className="text-sm md:text-lg sm:text-sm lg:text-lg text-violet-700 font-bold">{data.shortenUrl}</a>
 
                                   <HiQrCode size={20} className="cursor-pointer"
