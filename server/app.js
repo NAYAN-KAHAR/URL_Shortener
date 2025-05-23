@@ -9,7 +9,7 @@ import urlRoute  from './Routes/urlRoute.js'
 
 // Initialize the Express app
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 
 
 app.use(express.json());
@@ -26,6 +26,6 @@ mongoose.connection.on('error', (err) => {
 
 app.use('/api', urlRoute);
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
