@@ -15,6 +15,7 @@ const urlExists = async (url) => {
   };
   
 
+
 const shortenUrl = async (req, res) => {
     const { originalUrl, user } = req.body
     // console.log('userID', user);

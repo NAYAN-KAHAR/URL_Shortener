@@ -8,7 +8,6 @@ const getShortenUrl = async (req, res) => {
     try{
         const url = await urlModel.findOne({ shortenUrl: shortUrl });
         if(url){
-            await url.save();
             return res.redirect(url.originalUrl);
         }else{
             return res.status(404).json({ message:'url not found '});

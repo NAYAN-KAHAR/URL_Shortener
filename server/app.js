@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'https://rococo-melomakarona-47bf35.netlify.app/' }));
 app.use(helmet());
 
 mongoose.connection.on('open', () => {

@@ -14,13 +14,13 @@ const UrlShortner = () => {
     const [originalUrl, setOriginalUrl] = useState();
     const [allUrl, setAllUrl] = useState([]);
     const [qrcode, setQrCode] = useState();
-    const [user, setUser] =  useState();
+    const [user, setUser] =   useState();
 
  useEffect(() => {
     let storedNanoId = Cookies.get('userId');
     if (!storedNanoId) {
         storedNanoId = nanoid(8);
-        Cookies.set('userId', storedNanoId, { expires: 7, path: '' }); // Set once with expiry
+        Cookies.set('userId', storedNanoId, { expires: 365, path: '' }); // Set once with expiry
     }
     setUser(storedNanoId);
 }, []);
@@ -30,7 +30,7 @@ const UrlShortner = () => {
             if(!originalUrl) return alert('please enter link first');
             const res = await axios.post(`${Server_Url}/api/short`, { originalUrl, user });
             // console.log(res.data.message);
-            if(res.data.message == "Already shorten") toast.error("Already shorten")
+            if(res.data.message == "Already shorten") toast.error("Already shorten");
             setOriginalUrl(' ');
             
         }catch(err){
@@ -48,7 +48,6 @@ const UrlShortner = () => {
             setAllUrl(res.data.url);
         }catch(err){    
             console.log('error from findURL', err);
-           
         }
     }
 
@@ -99,7 +98,7 @@ const UrlShortner = () => {
                 </div>
 
                 <div className="p-2 flex flex-col sm:flex-col md:flex-row lg:flex-row xl:flex-row gap-4 mt-5">
-                    <input type="text" className="outline-none border-none  w-full p-3 rounded-lg bg-gray-100" placeholder="Enter Link Here" onChange={(e) => setOriginalUrl(e.target.value)}/>
+                    <input type="text" className="outline-none border-none  w-full p-3 rounded-lg bg-gray-100" placeholder="Enter Link Here" value={originalUrl} onChange={(e) => setOriginalUrl(e.target.value)}/>
                     <button className="w-full lg:w-50 md:w-50 sm:w-50 px-3 py-3 bg-violet-900 font-bold rounded-lg text-white cursor-pointer hover:bg-violet-700" onClick={handleUrl}>Shorten URL</button>
                 </div>
 
@@ -116,8 +115,12 @@ const UrlShortner = () => {
                                   className="text-sm md:text-lg sm:text-sm lg:text-lg text-violet-700 font-bold">{data.shortenUrl}</a>
 
                                   <HiQrCode size={20} className="cursor-pointer"
-                                   onClick={() => handleQrCode(data.originalUrl)}/>
-                                   <p onClick={() => handleCopy(data.shortenUrl)} className="text-sm md:text-lg sm:text-sm lg:text-lg  font-bold text-violet-700 cursor-pointer"><FaRegCopy size={18}/></p>
+                                   onClick={() => handleQrCode(data.originalUrl)} />
+
+                                   <p onClick={() => handleCopy(data.shortenUrl)} className="text-sm md:text-lg sm:text-sm lg:text-lg  font-bold text-violet-700 cursor-pointer">
+                                    <FaRegCopy size={18}/>
+                                    </p>
+
                                    <p onClick={() => deleteUrl(data.originalUrl)} className="text-xl font-bold text-violet-700 hover:text-red-500 cursor-pointer">X</p>
                                  </div>
                                
@@ -149,7 +152,6 @@ const UrlShortner = () => {
                 </div>
             )}
 
-   
         </>
     )
 }
