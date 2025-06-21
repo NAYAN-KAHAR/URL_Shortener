@@ -13,7 +13,9 @@ const PORT = process.env.PORT || 3000;
 
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: 'https://glittery-nasturtium-f8cd1f.netlify.app/',
+  credentials: true
+ }));
 app.use(helmet());
 
 mongoose.connection.on('open', () => {
