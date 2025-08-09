@@ -15,6 +15,7 @@ const UrlShortner = () => {
     const [allUrl, setAllUrl] = useState([]);
     const [qrcode, setQrCode] = useState();
     const [user, setUser] =   useState();
+    const [loader, setLoader] = useState(false);
 
  useEffect(() => {
     let storedNanoId = Cookies.get('userId');
@@ -25,69 +26,74 @@ const UrlShortner = () => {
     setUser(storedNanoId);
 }, []);
 
-    const handleUrl = async () => {
-        try{
-            if(!originalUrl) return alert('please enter link first');
-            const res = await axios.post(`${Server_Url}/api/short`, { originalUrl, user });
-            // console.log(res.data.message);
-            if(res.data.message == "Already shorten") toast.error("Already shorten");
-            setOriginalUrl(' ');
-            
-        }catch(err){
-            console.log('error from postURL', err);
-            // console.log(err.response.data.error);
-             toast.error(err.response.data.error);
-             toast.error(err.response.data.message);
-        }
+const handleUrl = async () => {
+  try {
+    if (!originalUrl) return alert('please enter link first');
+    const res = await axios.post(`${Server_Url}/api/short`, { originalUrl, user });
+    
+    if (res.data.message === "Already shorten") {
+      toast.error("Already shortened");
+    } else {
+      toast.success("URL shortened!");
     }
+    setOriginalUrl(''); 
+    findAllUrl();       // Refresh list manually
+  } catch (err) {
+    console.log('error from postURL', err);
+    toast.error(err.response?.data?.error || 'An error occurred');
+  }
+};
 
-    const findAllUrl = async () => {
-        try{
-            const res = await axios.get(`${Server_Url}/api/all/${user}`);
-            // console.log(res.data);
-            setAllUrl(res.data.url);
-        }catch(err){    
-            console.log('error from findURL', err);
-        }
-    }
 
-   useEffect(() => {
-     if (user) {
-       findAllUrl();
+const findAllUrl = async () => {
+    setLoader(true);
+     try{
+        const res = await axios.get(`${Server_Url}/api/all/${user}`);
+         // console.log(res.data);
+         setAllUrl(res.data.url);
+        setLoader(false);
+    }catch(err){    
+         console.log('error from findURL', err);
      }
-    }, [originalUrl, user]);
+}
 
-    // generate Uqcode
-    const handleQrCode = (url) => {
-        setModal(true);
-        setQrCode(url) ;
-    }
+useEffect(() => {
+  if (user) {
+    findAllUrl();
+  }
+}, [user]);
 
-    // copy url 
-    const handleCopy = async (url) => {
-    const newURL = `${Server_Url}/api/${url}`;
-       try{
-        await navigator.clipboard.writeText(newURL);
-        toast.success('copied');
-       }catch(err){
-        console.log(err);
-       }
-    }
+// delete url logic
+const deleteUrl = async (originalUrl) => {
+  if (!originalUrl) return;
+  try {
+    const res = await axios.delete(`${Server_Url}/api/urldelete`, { data: { originalUrl } });
+    toast.success('URL deleted');
+    findAllUrl(); // Refresh list after delete
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-    // handle delete url
-    const deleteUrl = async (originalUrl) => {
-        if(!originalUrl) return
-        try{
-            const res = await axios.delete(`${Server_Url}/api/urldelete`, { data: { originalUrl } });
-            // console.log(res.data);
-            setOriginalUrl(' ');
-        }catch(err){
-            console.log(err)
-        }
-        // console.log(originalUrl);
-    }
+// generate Uqcode
+const handleQrCode = (url) => {
+    setModal(true);
+    setQrCode(url) ;
+}
 
-    return(
+// copy url 
+const handleCopy = async (url) => {
+  const newURL = `${Server_Url}/api/${url}`;
+  try{
+     await navigator.clipboard.writeText(newURL);
+     toast.success('copied');
+}catch(err){
+  console.log(err);
+}
+ }
+
+
+ return(
         <>
      <ToastContainer />
         <div className="w-screen h-screen  flex items-center justify-center bg-gradient-to-r from-[#111729] via-[#181a3d] to-[#1d1b48]">
@@ -97,37 +103,39 @@ const UrlShortner = () => {
                     <h1 className="text-center text-3xl font-bold text-white">Best Free URL Shortener: Track & Optimize Links</h1>
                 </div>
 
-                <div className="p-2 flex flex-col sm:flex-col md:flex-row lg:flex-row xl:flex-row gap-4 mt-5">
-                    <input type="text" className="outline-none border-none  w-full p-3 rounded-lg bg-gray-100" placeholder="Enter Link Here" value={originalUrl} onChange={(e) => setOriginalUrl(e.target.value)}/>
-                    <button className="w-full lg:w-50 md:w-50 sm:w-50 px-3 py-3 bg-violet-900 font-bold rounded-lg text-white cursor-pointer hover:bg-violet-700" onClick={handleUrl}>Shorten URL</button>
+         <div className="p-2 flex flex-col sm:flex-col md:flex-row lg:flex-row xl:flex-row gap-4 mt-5">
+                <input type="text" className="outline-none border-none  w-full p-3 rounded-lg bg-gray-100" placeholder="Enter Link Here" value={originalUrl} onChange={(e) => setOriginalUrl(e.target.value)}/>
+                
+                 <button className="w-full lg:w-50 md:w-50 sm:w-50 px-3 py-3 bg-violet-900 font-bold rounded-lg text-white cursor-pointer hover:bg-violet-700" onClick={handleUrl}>Shorten URL</button>
                 </div>
 
 
-               <div className=" p-2 mt-5 space-y-4 max-h-[60%] sub-div">
-                       {allUrl && allUrl.map((data,i) => {
-                        return (
-                          
-                              <div key={i}
-                                className="w-full p-3 shadow-sm bg-white rounded-lg  flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between items-start md:items-center gap-4" >
-                              <p className="truncate w-full lg:w-auto text-lg">{data.originalUrl}</p>
-                               <div className="flex gap-4 items-center ">
-                                  <a href={`${Server_Url}/api/${data.shortenUrl}`} target="_blank" rel="noopener noreferrer"
+     <div className=" p-2 mt-5 space-y-4 max-h-[60%] sub-div">
+            {loader ? (<div class="flex justify-center items-center">
+            <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+            </div>
+            ):(allUrl && allUrl.map((data,i) => {
+                            return ( <div key={i}
+                className="w-full p-3 shadow-sm bg-white rounded-lg  flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between items-start md:items-center gap-4" >
+             <p className="truncate w-full lg:w-auto text-lg">{data.originalUrl}</p>
+                <div className="flex gap-4 items-center ">
+                       <a href={`${Server_Url}/api/${data.shortenUrl}`} target="_blank" rel="noopener noreferrer"
                                   className="text-sm md:text-lg sm:text-sm lg:text-lg text-violet-700 font-bold">{data.shortenUrl}</a>
 
-                                  <HiQrCode size={20} className="cursor-pointer"
+                          <HiQrCode size={20} className="cursor-pointer"
                                    onClick={() => handleQrCode(data.originalUrl)} />
 
-                                   <p onClick={() => handleCopy(data.shortenUrl)} className="text-sm md:text-lg sm:text-sm lg:text-lg  font-bold text-violet-700 cursor-pointer">
-                                    <FaRegCopy size={18}/>
-                                    </p>
+                         <p onClick={() => handleCopy(data.shortenUrl)} className="text-sm md:text-lg sm:text-sm lg:text-lg  font-bold text-violet-700 cursor-pointer">
+                         <FaRegCopy size={18}/>
+                         </p>
 
-                                   <p onClick={() => deleteUrl(data.originalUrl)} className="text-xl font-bold text-violet-700 hover:text-red-500 cursor-pointer">X</p>
-                                 </div>
+                         <p onClick={() => deleteUrl(data.originalUrl)} className="text-xl font-bold text-violet-700 hover:text-red-500 cursor-pointer">X</p>
+                     </div>
                                
-                             </div>
-                      
-                        )
-                       })}
+                 </div>
+         )
+         }))
+}
                
 
                 </div>

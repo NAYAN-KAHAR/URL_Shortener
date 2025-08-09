@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 // CORS config
 app.use(cors({
-  origin: 'https://glittery-nasturtium-f8cd1f.netlify.app', // ✅ no trailing slash
+  origin: '*', // ✅ no trailing slash
   credentials: true
 }));
 app.options('*', cors()); // ✅ allow preflight requests

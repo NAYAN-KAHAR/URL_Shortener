@@ -35,7 +35,7 @@ const shortenUrl = async (req, res) => {
 
            // Count how many URLs the user has created
         const userUrlCount = await urlModel.countDocuments({ userId: user });
-        if (userUrlCount >= 6) {
+        if (userUrlCount >= 10) {
           return res.status(403).json({ message: 'Limit reached: You can only shorten up to 6 URLs.' });
         }
 
